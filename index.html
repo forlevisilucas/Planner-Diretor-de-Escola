@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planner de Estudos - Concurso Diretor de Escola</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --alta-color: #FFC7CE;
+            --media-color: #FFEB9C;
+            --baixa-color: #C6EFCE;
+            --cabecalho-color: #4472C4;
+            --dia-color: #D9E1F2;
+            --revisao-color: #E2EFDA;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            transition: background-color 0.3s ease;
+        }
+        
+        .dark-theme {
+            background-color: #343a40;
+            color: #f8f9fa;
+        }
+        
+        .dark-theme .card,
+        .dark-theme .tab-content {
+            background-color: #495057;
+            color: #f8f9fa;
+        }
+        
+        .dark-theme .nav-pills .nav-link {
+            color: #f8f9fa;
+        }
+        
+        .header {
+            background-color: var(--cabecalho-color);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: var(--cabecalho-color);
+        }
+        
+        .nav-pills .nav-link {
+            color: #333;
+        }
+        
+        .tab-content {
+            padding: 20px;
+            background-color: white;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .prioridade-alta {
+            background-color: var(--alta-color);
+        }
+        
+        .prioridade-media {
+            background-color: var(--media-color);
+        }
+        
+        .prioridade-baixa {
+            background-color: var(--baixa-color);
+        }
+        
+        .dia-semana {
+            background-color: var(--dia-color);
+            font-weight: bold;
+        }
+        
+        .revisao {
+            background-color: var(--revisao-color);
+        }
+        
+        .cabecalho {
+            background-color: var(--cabecalho-color);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        
+        .accordion-button:not(.collapsed) {
+            background-color: var(--cabecalho-color);
+            color: white;
+        }
+        
+        .accordion-button:focus {
+            box-shadow: 0 0 0 0.25rem rgba(68, 114, 196, 0.25);
+        }
+        
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            background-color: var(--cabecalho-color);
+            color: white;
+        }
+        
+        .footer {
+            background-color: var(--cabecalho-color);
+            color: white;
+            padding: 1rem 0;
+            margin-top: 2rem;
+        }
+        
+        .completed-task {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+        
+        .form-switch .form-check-input:checked {
+            background-color: var(--cabecalho-color);
+            border-color: var(--cabecalho-color);
+        }
+        
+        .countdown-container {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .dark-theme .countdown-container {
+            background-color: #495057;
+        }
+        
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            body {
+                background-color: white !important;
+                color: black !important;
+            }
+            
+            .tab-content {
+                display: block !important;
+            }
+            
+            .tab-pane {
+                display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container text-center">
+            <h1>Planner de Estudos</h1>
+            <h2>Concurso para Diretor de Escola</h2>
+            <p class="lead">Baseado nas provas anteriores da VUNESP e no conteúdo programático do edital</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Barra de ferramentas -->
+        <div class="row mb-4 no-print">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Pesquisar conteúdo...">
+                </div>
+            </div>
+            <div class="col-md-6 d-flex justify-content-end">
+                <button id="printButton" class="btn btn-outline-secondary me-2">
+                    <i class="bi bi-printer"></i> Imprimir
+                </button>
+                <button id="exportPdfButton" class="btn btn-outline-secondary me-2">
+                    <i class="bi bi-file-pdf"></i> Exportar PDF
+                </button>
+                <div class="form-check form-switch ms-2 d-flex align-items-center">
+                    <input class="form-check-input" type="checkbox" id="themeToggle">
+                    <label class="form-check-label ms-2" for="themeToggle">Modo Escuro</label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contador regressivo -->
+        <div class="row mb-4 no-print">
+            <div class="col-12">
+                <div class="countdown-container">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 id="countdown" class="text-primary mb-0">Carregando...</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">Data da Prova</span>
+                                <input type="date" class="form-control" id="examDateInput">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-pills mb-3 no-print" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-resumo-tab" data-bs-toggle="pill" data-bs-target="#pills-resumo" type="button" role="tab" aria-controls="pills-resumo" aria-selected="true">Resumo</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-semana1-tab" data-bs-toggle="pill" data-bs-target="#pills-semana1" type="button" role="tab" aria-controls="pills-semana1" aria-selected="false">Semana 1</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-semana2-tab" data-bs-toggle="pill" data-bs-target="#pills-semana2" type="button" role="tab" aria-controls="pills-semana2" aria-selected="false">Semana 2</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-semana3-tab" data-bs-toggle="pill" data-bs-target="#pills-semana3" type="button" role="tab" aria-controls="pills-semana3" aria-selected="false">Semana 3</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-semana4-tab" data-bs-toggle="pill" data-bs-target="#pills-semana4" type="button" role="tab" aria-controls="pills-semana4" aria-selected="false">Semana 4</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-bibliografia-tab" data-bs-toggle="pill" data-bs-target="#pills-bibliografia" type="button" role="tab" aria-controls="pills-bibliografia" aria-selected="false">Bibliografia</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="pills-tabContent">
+            <!-- Resumo -->
+            <div class="tab-pane fade show active" id="pills-resumo" role="tabpanel" aria-labelledby="pills-resumo-tab">
+                <h3 class="mb-4">Análise de Prioridades</h3>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Distribuição de Questões por Disciplina</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Prova VUNESP 2023 - São Bernardo do Campo</h5>
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-alta">
+                                        Pedagogia
+                                        <span class="badge bg-primary rounded-pill">38/60 questões (63,3%)</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-media">
+                                        Português
+                                        <span class="badge bg-primary rounded-pill">5/60 questões (8,3%)</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-media">
+                                        Matemática
+                                        <span class="badge bg-primary rounded-pill">5/60 questões (8,3%)</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-baixa">
+                                        Atualidades
+                                        <span class="badge bg-primary rounded-pill">3/60 questões (5%)</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-baixa">
+                                        Conhecimentos Gerais
+                                        <span class="badge bg-primary rounded-pill">1/60 questões (1,7%)</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-baixa">
+                                        Noções de Informática
+                                        <span class="badge bg-primary rounded-pill">5/60 questões (8,3%)</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Prova VUNESP 2024 - Lins</h5>
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-alta">
+                                        Pedagogia
+                                        <span class="badge bg-primary rounded-pill">24/50 questões (48%)</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-media">
+                                        Português
+                                        <span class="badge bg-primary rounded-pill">10/50 questões (20%)</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-media">
+                                        Matemática
+                                        <span class="badge bg-primary rounded-pill">10/50 questões (20%)</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Assuntos Mais Relevantes</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Prova VUNESP 2023 - São Bernardo do Campo</h5>
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-alta">
+                                        Temas Educacionais Pedagógicos
+                                        <span class="badge bg-primary rounded-pill">12%</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-alta">
+                                        Principais Autores
+                                        <span class="badge bg-primary rounded-pill">9%</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-alta">
+                                        Legislação da Educação
+                                        <span class="badge bg-primary rounded-pill">8%</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Prova VUNESP 2024 - Lins</h5>
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-alta">
+                                        Temas Educacionais Pedagógicos
+                                        <span class="badge bg-primary rounded-pill">12%</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-media">
+                                        Aritmética e Problemas
+                                        <span class="badge bg-primary rounded-pill">8%</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center prioridade-media">
+                                        Interpretação de Textos
+                                        <span class="badge bg-primary rounded-pill">4%</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Distribuição do Tempo de Estudo</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>Parâmetros Básicos</h5>
+                        <ul>
+                            <li><strong>Tempo diário disponível:</strong> 2 horas (120 minutos)</li>
+                            <li><strong>Dias de estudo por semana:</strong> 7 dias</li>
+                            <li><strong>Total de horas semanais:</strong> 14 horas (840 minutos)</li>
+                        </ul>
+                        
+                        <h5>Distribuição por Prioridade (Semanal)</h5>
+                        <div class="accordion" id="accordionPrioridades">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingAlta">
+                                    <button class="accordion-button prioridade-alta" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAlta" aria-expanded="true" aria-controls="collapseAlta">
+                                        Prioridade Alta (60% do tempo)
+                                    </button>
+                                </h2>
+                                <div id="collapseAlta" class="accordion-collapse collapse show" aria-labelledby="headingAlta" data-bs-parent="#accordionPrioridades">
+                                    <div class="accordion-body">
+                                        <p><strong>Tempo semanal:</strong> 8,4 horas (504 minutos)</p>
+                                        <ul>
+                                            <li><strong>Temas Educacionais Pedagógicos:</strong> 3,5 horas (210 minutos)</li>
+                                            <li><strong>Principais Autores e Teóricos da Educação:</strong> 2,5 horas (150 minutos)</li>
+                                            <li><strong>Legislação da Educação:</strong> 2,4 horas (144 minutos)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingMedia">
+                                    <button class="accordion-button collapsed prioridade-media" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMedia" aria-expanded="false" aria-controls="collapseMedia">
+                                        Prioridade Média (30% do tempo)
+                                    </button>
+                                </h2>
+                                <div id="collapseMedia" class="accordion-collapse collapse" aria-labelledby="headingMedia" data-bs-parent="#accordionPrioridades">
+                                    <div class="accordion-body">
+                                        <p><strong>Tempo semanal:</strong> 4,2 horas (252 minutos)</p>
+                                        <ul>
+                                            <li><strong>Português (Interpretação de Textos, Gramática):</strong> 1,4 horas (84 minutos)</li>
+                                            <li><strong>Matemática (Aritmética e Problemas):</strong> 1,4 horas (84 minutos)</li>
+                                            <li><strong>Gestão de Pessoas:</strong> 1,4 horas (84 minutos)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingBaixa">
+                                    <button class="accordion-button collapsed prioridade-baixa" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBaixa" aria-expanded="false" aria-controls="collapseBaixa">
+                                        Prioridade Baixa (10% do tempo)
+                                    </button>
+                                </h2>
+                                <div id="collapseBaixa" class="accordion-collapse collapse" aria-labelledby="headingBaixa" data-bs-parent="#accordionPrioridades">
+                                    <div class="accordion-body">
+                                        <p><strong>Tempo semanal:</strong> 1,4 horas (84 minutos)</p>
+                                        <ul>
+                                            <li><strong>Noções de Informática:</strong> 0,7 horas (42 minutos)</li>
+                                            <li><strong>Atualidades e Conhecimentos Gerais:</strong> 0,7 horas (42 minutos)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Ciclo de Estudos</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>Para um aprendizado eficaz, o planner segue um ciclo de estudos de 4 semanas:</p>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="cabecalho">
+                                    <tr>
+                                        <th>Semana</th>
+                                        <th>Foco</th>
+                                        <th>Descrição</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-center">1</td>
+                                        <td><strong>Introdução aos temas</strong></td>
+                                        <td>Foco em conceitos fundamentais e visão geral de cada tema</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2</td>
+                                        <td><strong>Aprofundamento</strong></td>
+                                        <td>Estudo detalhado dos tópicos mais importantes de cada tema</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">3</td>
+                                        <td><strong>Aplicação e prática</strong></td>
+                                        <td>Resolução de questões e exercícios práticos sobre os temas estudados</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">4</td>
+                                        <td><strong>Revisão e consolidação</strong></td>
+                                        <td>Revisão dos temas estudados nas semanas anteriores e simulados para verificar o aprendizado</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p>Este ciclo se repetirá até a data da prova, com ajustes conforme necessário para garantir que todos os temas sejam adequadamente cobertos.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Instruções de Uso</h4>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>Este planner foi desenvolvido para um estudo de 2 horas diárias, 7 dias por semana.</li>
+                            <li>Cada semana segue um ciclo de aprendizado: introdução, aprofundamento, aplicação e revisão.</li>
+                            <li>Os temas foram priorizados com base na análise das provas anteriores da VUNESP.</li>
+                            <li>Recomenda-se seguir a ordem dos temas conforme apresentado em cada dia.</li>
+                            <li>Utilize o domingo para revisar os conteúdos estudados durante a semana.</li>
+                            <li>Ajuste o cronograma conforme necessário, respeitando a distribuição de tempo por prioridade.</li>
+                            <li>Ao final de cada ciclo de 4 semanas, faça uma autoavaliação e ajuste seu foco se necessário.</li>
+                            <li>Marque as tarefas concluídas para acompanhar seu progresso.</li>
+                            <li>Use a função de pesquisa para encontrar tópicos específicos.</li>
+                            <li>Defina a data da sua prova para visualizar o contador regressivo.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Semana 1 -->
+            <div class="tab-pane fade" id="pills-semana1" role="tabpanel" aria-labelledby="pills-semana1-tab">
+                <h3 class="mb-4">Semana 1 - Introdução aos temas</h3>
+                
+                <!-- Barra de progresso -->
+                <div class="progress mb-4 no-print" id="progress-semana1">
+                    <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="cabecalho">
+                            <tr>
+                                <th width="15%">Dia</th>
+                                <th width="5%" class="no-print">Concluído</th>
+                                <th width="20%">Conteúdo</th>
+                                <th width="45%">Tópicos Específicos</th>
+                                <th width="15%">Tempo (min)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Segunda-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Segunda-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-1"></td>
+                                <td class="prioridade-alta">Temas Educacionais Pedagógicos</td>
+                                <td class="prioridade-alta">Introdução a: Autonomia da Escola, Avaliação e acompanhamento do rendimento escolar, Currículo e BNCC</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-2"></td>
+                                <td class="prioridade-media">Português (Interpretação e Gramática)</td>
+                                <td class="prioridade-media">Introdução a: Interpretação de textos, Tipologia textual, Coesão e coerência</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-3"></td>
+                                <td class="prioridade-baixa">Noções de Informática</td>
+                                <td class="prioridade-baixa">Introdução a: Pacote Office (Word, Excel, PowerPoint), Internet e navegação, Correio eletrônico</td>
+                                <td class="prioridade-baixa text-center">30</td>
+                            </tr>
+                            
+                            <!-- Terça-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Terça-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-4"></td>
+                                <td class="prioridade-alta">Principais Autores e Teóricos da Educação</td>
+                                <td class="prioridade-alta">Introdução a: Paulo Freire, Vygotsky, Piaget</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-5"></td>
+                                <td class="prioridade-media">Matemática (Aritmética e Problemas)</td>
+                                <td class="prioridade-media">Introdução a: Operações fundamentais, Frações e porcentagens, Razão e proporção</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-6"></td>
+                                <td class="prioridade-media">Gestão de Pessoas</td>
+                                <td class="prioridade-media">Introdução a: Clima e Cultura Organizacional, Formação continuada, Liderança</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            
+                            <!-- Quarta-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Quarta-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-7"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Introdução a: Constituição Federal (artigos 208 a 214), LDB - Lei 9.394/96, ECA - Lei 8.069/90</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-8"></td>
+                                <td class="prioridade-media">Português (Interpretação e Gramática)</td>
+                                <td class="prioridade-media">Introdução a: Sintaxe, Pontuação, Concordância verbal e nominal</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-9"></td>
+                                <td class="prioridade-baixa">Atualidades e Conhecimentos Gerais</td>
+                                <td class="prioridade-baixa">Introdução a: Políticas educacionais recentes, Educação pós-pandemia, Educação inclusiva</td>
+                                <td class="prioridade-baixa text-center">30</td>
+                            </tr>
+                            
+                            <!-- Quinta-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Quinta-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-10"></td>
+                                <td class="prioridade-alta">Temas Educacionais Pedagógicos</td>
+                                <td class="prioridade-alta">Introdução a: Educação Inclusiva, Ensino e aprendizagem, Planejamento</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-11"></td>
+                                <td class="prioridade-media">Matemática (Aritmética e Problemas)</td>
+                                <td class="prioridade-media">Introdução a: Regra de três simples e composta, Equações de 1º e 2º graus, Sistemas de equações</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-12"></td>
+                                <td class="prioridade-media">Gestão de Pessoas</td>
+                                <td class="prioridade-media">Introdução a: Mediação e gestão de conflitos, Participação e trabalho coletivo na escola, Poder nas organizações</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            
+                            <!-- Sexta-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Sexta-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-13"></td>
+                                <td class="prioridade-alta">Principais Autores e Teóricos da Educação</td>
+                                <td class="prioridade-alta">Introdução a: Luckesi, Rios, Libâneo</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-14"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Introdução a: FUNDEB - Lei 14.276/21, Lei do Piso Salarial - Lei 11.738/08, Lei 11.645/08 - Cultura e história afro-brasileira</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-15"></td>
+                                <td class="prioridade-baixa">Noções de Informática</td>
+                                <td class="prioridade-baixa">Introdução a: Sistemas operacionais, Segurança da informação, Tecnologias na educação</td>
+                                <td class="prioridade-baixa text-center">30</td>
+                            </tr>
+                            
+                            <!-- Sábado -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Sábado</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-16"></td>
+                                <td class="prioridade-alta">Temas Educacionais Pedagógicos</td>
+                                <td class="prioridade-alta">Introdução a: Políticas, estrutura e organização da escola, Projeto Político-Pedagógico, Regimento Escolar</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-17"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Introdução a: BNCC - Base Nacional Comum Curricular, Resolução EJA - nº 01-maio/21, Plano Nacional de Educação</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-18"></td>
+                                <td class="prioridade-media">Gestão de Pessoas</td>
+                                <td class="prioridade-media">Introdução a: Comunicação eficaz, Motivação de equipes, Avaliação de desempenho</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            
+                            <!-- Domingo -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Domingo</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-19"></td>
+                                <td class="prioridade-alta">Principais Autores e Teóricos da Educação</td>
+                                <td class="prioridade-alta">Introdução a: Saviani, Perrenoud, Zabala</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-20"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Introdução a: Diretrizes Curriculares Nacionais</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s1-21"></td>
+                                <td class="revisao">Revisão dos temas da semana</td>
+                                <td class="revisao">Revisão geral dos temas estudados durante a semana</td>
+                                <td class="revisao text-center">60</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Semana 2 -->
+            <div class="tab-pane fade" id="pills-semana2" role="tabpanel" aria-labelledby="pills-semana2-tab">
+                <h3 class="mb-4">Semana 2 - Aprofundamento</h3>
+                
+                <!-- Barra de progresso -->
+                <div class="progress mb-4 no-print" id="progress-semana2">
+                    <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="cabecalho">
+                            <tr>
+                                <th width="15%">Dia</th>
+                                <th width="5%" class="no-print">Concluído</th>
+                                <th width="20%">Conteúdo</th>
+                                <th width="45%">Tópicos Específicos</th>
+                                <th width="15%">Tempo (min)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Segunda-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Segunda-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-1"></td>
+                                <td class="prioridade-alta">Temas Educacionais Pedagógicos</td>
+                                <td class="prioridade-alta">Aprofundamento em: Avaliação e acompanhamento do rendimento escolar, Currículo e BNCC, Educação Inclusiva, Ensino e aprendizagem</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-2"></td>
+                                <td class="prioridade-media">Português (Interpretação e Gramática)</td>
+                                <td class="prioridade-media">Aprofundamento em: Tipologia textual, Coesão e coerência, Sintaxe, Pontuação</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-3"></td>
+                                <td class="prioridade-baixa">Noções de Informática</td>
+                                <td class="prioridade-baixa">Aprofundamento em: Internet e navegação, Correio eletrônico, Sistemas operacionais, Segurança da informação</td>
+                                <td class="prioridade-baixa text-center">30</td>
+                            </tr>
+                            
+                            <!-- Terça-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Terça-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-4"></td>
+                                <td class="prioridade-alta">Principais Autores e Teóricos da Educação</td>
+                                <td class="prioridade-alta">Aprofundamento em: Vygotsky, Piaget, Luckesi, Rios</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-5"></td>
+                                <td class="prioridade-media">Matemática (Aritmética e Problemas)</td>
+                                <td class="prioridade-media">Aprofundamento em: Frações e porcentagens, Razão e proporção, Regra de três simples e composta, Equações de 1º e 2º graus</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-6"></td>
+                                <td class="prioridade-media">Gestão de Pessoas</td>
+                                <td class="prioridade-media">Aprofundamento em: Formação continuada, Liderança, Mediação e gestão de conflitos, Participação e trabalho coletivo na escola</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            
+                            <!-- Quarta-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Quarta-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-7"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Aprofundamento em: LDB - Lei 9.394/96, ECA - Lei 8.069/90, FUNDEB - Lei 14.276/21, Lei do Piso Salarial - Lei 11.738/08</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-8"></td>
+                                <td class="prioridade-media">Português (Interpretação e Gramática)</td>
+                                <td class="prioridade-media">Aprofundamento em: Concordância verbal e nominal, Regência verbal e nominal, Crase, Ortografia</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-9"></td>
+                                <td class="prioridade-baixa">Atualidades e Conhecimentos Gerais</td>
+                                <td class="prioridade-baixa">Aprofundamento em: Educação pós-pandemia, Educação inclusiva, Educação ambiental, Educação e tecnologia</td>
+                                <td class="prioridade-baixa text-center">30</td>
+                            </tr>
+                            
+                            <!-- Quinta-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Quinta-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-10"></td>
+                                <td class="prioridade-alta">Temas Educacionais Pedagógicos</td>
+                                <td class="prioridade-alta">Aprofundamento em: Planejamento, Políticas, estrutura e organização da escola, Projeto Político-Pedagógico, Regimento Escolar</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-11"></td>
+                                <td class="prioridade-media">Matemática (Aritmética e Problemas)</td>
+                                <td class="prioridade-media">Aprofundamento em: Sistemas de equações, Geometria básica, Análise de gráficos e tabelas, Resolução de problemas</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-12"></td>
+                                <td class="prioridade-media">Gestão de Pessoas</td>
+                                <td class="prioridade-media">Aprofundamento em: Poder nas organizações, Comunicação eficaz, Motivação de equipes, Avaliação de desempenho</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            
+                            <!-- Sexta-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Sexta-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-13"></td>
+                                <td class="prioridade-alta">Principais Autores e Teóricos da Educação</td>
+                                <td class="prioridade-alta">Aprofundamento em: Libâneo, Saviani, Perrenoud, Zabala</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-14"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Aprofundamento em: Lei 11.645/08 - Cultura e história afro-brasileira, BNCC - Base Nacional Comum Curricular, Resolução EJA - nº 01-maio/21</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-15"></td>
+                                <td class="prioridade-baixa">Noções de Informática</td>
+                                <td class="prioridade-baixa">Aprofundamento em: Tecnologias na educação, Ferramentas digitais para gestão escolar, Ambientes virtuais de aprendizagem, Redes sociais na educação</td>
+                                <td class="prioridade-baixa text-center">30</td>
+                            </tr>
+                            
+                            <!-- Sábado -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Sábado</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-16"></td>
+                                <td class="prioridade-alta">Temas Educacionais Pedagógicos</td>
+                                <td class="prioridade-alta">Aprofundamento em: Tendências educacionais na sala de aula</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-17"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Aprofundamento em: Plano Nacional de Educação, Diretrizes Curriculares Nacionais</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-18"></td>
+                                <td class="prioridade-media">Gestão de Pessoas</td>
+                                <td class="prioridade-media">Aprofundamento em: Gestão democrática</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            
+                            <!-- Domingo -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Domingo</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-19"></td>
+                                <td class="prioridade-alta">Principais Autores e Teóricos da Educação</td>
+                                <td class="prioridade-alta">Aprofundamento em: Hoffmann</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-20"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Revisão da legislação estudada</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s2-21"></td>
+                                <td class="revisao">Revisão dos temas da semana</td>
+                                <td class="revisao">Revisão geral dos temas estudados durante a semana</td>
+                                <td class="revisao text-center">60</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Semana 3 -->
+            <div class="tab-pane fade" id="pills-semana3" role="tabpanel" aria-labelledby="pills-semana3-tab">
+                <h3 class="mb-4">Semana 3 - Aplicação e prática</h3>
+                
+                <!-- Barra de progresso -->
+                <div class="progress mb-4 no-print" id="progress-semana3">
+                    <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="cabecalho">
+                            <tr>
+                                <th width="15%">Dia</th>
+                                <th width="5%" class="no-print">Concluído</th>
+                                <th width="20%">Conteúdo</th>
+                                <th width="45%">Tópicos Específicos</th>
+                                <th width="15%">Tempo (min)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Segunda-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Segunda-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-1"></td>
+                                <td class="prioridade-alta">Temas Educacionais Pedagógicos</td>
+                                <td class="prioridade-alta">Prática e aplicação: Ensino e aprendizagem, Planejamento, Políticas, estrutura e organização da escola, Projeto Político-Pedagógico</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-2"></td>
+                                <td class="prioridade-media">Português (Interpretação e Gramática)</td>
+                                <td class="prioridade-media">Prática e aplicação: Resolução de questões de interpretação de textos e gramática</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-3"></td>
+                                <td class="prioridade-baixa">Noções de Informática</td>
+                                <td class="prioridade-baixa">Prática e aplicação: Exercícios práticos sobre ferramentas digitais e tecnologias na educação</td>
+                                <td class="prioridade-baixa text-center">30</td>
+                            </tr>
+                            
+                            <!-- Terça-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Terça-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-4"></td>
+                                <td class="prioridade-alta">Principais Autores e Teóricos da Educação</td>
+                                <td class="prioridade-alta">Prática e aplicação: Resolução de questões sobre Paulo Freire, Vygotsky, Piaget, Luckesi</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-5"></td>
+                                <td class="prioridade-media">Matemática (Aritmética e Problemas)</td>
+                                <td class="prioridade-media">Prática e aplicação: Resolução de problemas matemáticos</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-6"></td>
+                                <td class="prioridade-media">Gestão de Pessoas</td>
+                                <td class="prioridade-media">Prática e aplicação: Estudos de caso sobre gestão de conflitos e liderança</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            
+                            <!-- Quarta-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Quarta-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-7"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Prática e aplicação: Resolução de questões sobre LDB, ECA, FUNDEB e outras legislações</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-8"></td>
+                                <td class="prioridade-media">Português (Interpretação e Gramática)</td>
+                                <td class="prioridade-media">Prática e aplicação: Exercícios de concordância, regência e crase</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-9"></td>
+                                <td class="prioridade-baixa">Atualidades e Conhecimentos Gerais</td>
+                                <td class="prioridade-baixa">Prática e aplicação: Análise de notícias recentes sobre educação</td>
+                                <td class="prioridade-baixa text-center">30</td>
+                            </tr>
+                            
+                            <!-- Quinta-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Quinta-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-10"></td>
+                                <td class="prioridade-alta">Temas Educacionais Pedagógicos</td>
+                                <td class="prioridade-alta">Prática e aplicação: Resolução de questões sobre Regimento Escolar, Tendências educacionais, Autonomia da Escola</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-11"></td>
+                                <td class="prioridade-media">Matemática (Aritmética e Problemas)</td>
+                                <td class="prioridade-media">Prática e aplicação: Exercícios de análise de gráficos e tabelas</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-12"></td>
+                                <td class="prioridade-media">Gestão de Pessoas</td>
+                                <td class="prioridade-media">Prática e aplicação: Simulações de situações de gestão escolar</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            
+                            <!-- Sexta-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Sexta-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-13"></td>
+                                <td class="prioridade-alta">Principais Autores e Teóricos da Educação</td>
+                                <td class="prioridade-alta">Prática e aplicação: Resolução de questões sobre Rios, Libâneo, Saviani, Perrenoud</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-14"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Prática e aplicação: Análise de casos práticos envolvendo legislação educacional</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-15"></td>
+                                <td class="prioridade-baixa">Noções de Informática</td>
+                                <td class="prioridade-baixa">Prática e aplicação: Resolução de questões sobre informática aplicada à educação</td>
+                                <td class="prioridade-baixa text-center">30</td>
+                            </tr>
+                            
+                            <!-- Sábado -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Sábado</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-16"></td>
+                                <td class="prioridade-alta">Temas Educacionais Pedagógicos</td>
+                                <td class="prioridade-alta">Prática e aplicação: Simulado sobre temas educacionais</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-17"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Prática e aplicação: Simulado sobre legislação educacional</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-18"></td>
+                                <td class="prioridade-media">Gestão de Pessoas</td>
+                                <td class="prioridade-media">Prática e aplicação: Resolução de questões sobre gestão democrática</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            
+                            <!-- Domingo -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Domingo</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-19"></td>
+                                <td class="prioridade-alta">Principais Autores e Teóricos da Educação</td>
+                                <td class="prioridade-alta">Prática e aplicação: Simulado sobre autores e teorias</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-20"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Prática e aplicação: Correção e análise dos simulados</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s3-21"></td>
+                                <td class="revisao">Revisão dos temas da semana</td>
+                                <td class="revisao">Revisão geral dos temas estudados durante a semana</td>
+                                <td class="revisao text-center">60</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Semana 4 -->
+            <div class="tab-pane fade" id="pills-semana4" role="tabpanel" aria-labelledby="pills-semana4-tab">
+                <h3 class="mb-4">Semana 4 - Revisão e consolidação</h3>
+                
+                <!-- Barra de progresso -->
+                <div class="progress mb-4 no-print" id="progress-semana4">
+                    <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="cabecalho">
+                            <tr>
+                                <th width="15%">Dia</th>
+                                <th width="5%" class="no-print">Concluído</th>
+                                <th width="20%">Conteúdo</th>
+                                <th width="45%">Tópicos Específicos</th>
+                                <th width="15%">Tempo (min)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Segunda-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Segunda-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-1"></td>
+                                <td class="prioridade-alta">Temas Educacionais Pedagógicos</td>
+                                <td class="prioridade-alta">Revisão de: Autonomia da Escola, Avaliação e acompanhamento do rendimento escolar, Currículo, Educação Inclusiva, Ensino e aprendizagem</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-2"></td>
+                                <td class="prioridade-media">Português (Interpretação e Gramática)</td>
+                                <td class="prioridade-media">Revisão de: Interpretação de textos, Tipologia textual, Coesão e coerência, Sintaxe, Pontuação</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-3"></td>
+                                <td class="prioridade-baixa">Noções de Informática</td>
+                                <td class="prioridade-baixa">Revisão de: Pacote Office, Internet e navegação, Correio eletrônico, Sistemas operacionais, Segurança da informação</td>
+                                <td class="prioridade-baixa text-center">30</td>
+                            </tr>
+                            
+                            <!-- Terça-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Terça-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-4"></td>
+                                <td class="prioridade-alta">Principais Autores e Teóricos da Educação</td>
+                                <td class="prioridade-alta">Revisão de: Paulo Freire, Vygotsky, Piaget, Luckesi, Rios, Libâneo, Saviani, Perrenoud, Zabala, Hoffmann</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-5"></td>
+                                <td class="prioridade-media">Matemática (Aritmética e Problemas)</td>
+                                <td class="prioridade-media">Revisão de: Operações fundamentais, Frações e porcentagens, Razão e proporção, Regra de três, Equações, Geometria, Análise de gráficos</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-6"></td>
+                                <td class="prioridade-media">Gestão de Pessoas</td>
+                                <td class="prioridade-media">Revisão de: Clima e Cultura Organizacional, Formação continuada, Liderança, Mediação e gestão de conflitos, Trabalho coletivo</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            
+                            <!-- Quarta-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Quarta-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-7"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Revisão de: Constituição Federal, LDB, ECA, FUNDEB, Lei do Piso Salarial, Lei 11.645/08, BNCC, Resolução EJA, Plano Nacional de Educação</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-8"></td>
+                                <td class="prioridade-media">Português (Interpretação e Gramática)</td>
+                                <td class="prioridade-media">Revisão de: Concordância verbal e nominal, Regência verbal e nominal, Crase, Ortografia, Semântica</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-9"></td>
+                                <td class="prioridade-baixa">Atualidades e Conhecimentos Gerais</td>
+                                <td class="prioridade-baixa">Revisão de: Políticas educacionais recentes, Educação pós-pandemia, Educação inclusiva, Educação ambiental, Educação e tecnologia</td>
+                                <td class="prioridade-baixa text-center">30</td>
+                            </tr>
+                            
+                            <!-- Quinta-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Quinta-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-10"></td>
+                                <td class="prioridade-alta">Temas Educacionais Pedagógicos</td>
+                                <td class="prioridade-alta">Revisão de: Planejamento, Políticas, estrutura e organização da escola, Projeto Político-Pedagógico, Regimento Escolar, Tendências educacionais</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-11"></td>
+                                <td class="prioridade-media">Matemática (Aritmética e Problemas)</td>
+                                <td class="prioridade-media">Simulado de matemática</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-12"></td>
+                                <td class="prioridade-media">Gestão de Pessoas</td>
+                                <td class="prioridade-media">Revisão de: Poder nas organizações, Comunicação eficaz, Motivação de equipes, Avaliação de desempenho, Gestão democrática</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            
+                            <!-- Sexta-feira -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Sexta-feira</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-13"></td>
+                                <td class="prioridade-alta">Principais Autores e Teóricos da Educação</td>
+                                <td class="prioridade-alta">Simulado sobre autores e teorias</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-14"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Simulado sobre legislação educacional</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-15"></td>
+                                <td class="prioridade-baixa">Noções de Informática</td>
+                                <td class="prioridade-baixa">Simulado sobre informática</td>
+                                <td class="prioridade-baixa text-center">30</td>
+                            </tr>
+                            
+                            <!-- Sábado -->
+                            <tr>
+                                <td rowspan="3" class="dia-semana text-center">Sábado</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-16"></td>
+                                <td class="prioridade-alta">Temas Educacionais Pedagógicos</td>
+                                <td class="prioridade-alta">Simulado geral sobre temas educacionais</td>
+                                <td class="prioridade-alta text-center">60</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-17"></td>
+                                <td class="prioridade-alta">Legislação da Educação</td>
+                                <td class="prioridade-alta">Correção e análise dos simulados</td>
+                                <td class="prioridade-alta text-center">30</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-18"></td>
+                                <td class="prioridade-media">Gestão de Pessoas</td>
+                                <td class="prioridade-media">Simulado sobre gestão de pessoas</td>
+                                <td class="prioridade-media text-center">30</td>
+                            </tr>
+                            
+                            <!-- Domingo -->
+                            <tr>
+                                <td class="dia-semana text-center">Domingo</td>
+                                <td class="text-center no-print"><input type="checkbox" class="form-check-input task-checkbox" id="task-s4-19"></td>
+                                <td colspan="2" class="revisao text-center">REVISÃO GERAL E SIMULADO</td>
+                                <td class="revisao text-center">120</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Bibliografia -->
+            <div class="tab-pane fade" id="pills-bibliografia" role="tabpanel" aria-labelledby="pills-bibliografia-tab">
+                <h3 class="mb-4">Bibliografia Recomendada</h3>
+                
+                <div class="accordion" id="accordionBibliografia">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTemas">
+                            <button class="accordion-button prioridade-alta" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTemas" aria-expanded="true" aria-controls="collapseTemas">
+                                Temas Educacionais Pedagógicos
+                            </button>
+                        </h2>
+                        <div id="collapseTemas" class="accordion-collapse collapse show" aria-labelledby="headingTemas" data-bs-parent="#accordionBibliografia">
+                            <div class="accordion-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">BACICH, Lilian e MORAN, José. Metodologias ativas para uma educação inovadora. Editora Penso, 2017.</li>
+                                    <li class="list-group-item">LIBÂNEO, José Carlos. Organização e gestão da escola: teoria e prática. Goiânia: Alternativa, 2004.</li>
+                                    <li class="list-group-item">LÜCK, Heloísa. A gestão participativa na escola. Petrópolis: Vozes, 2010.</li>
+                                    <li class="list-group-item">VEIGA, Ilma P. e RESENDE, Lúcia M.G. de. Escola: espaço do projeto político-pedagógico. Campinas: Papirus, 2008.</li>
+                                    <li class="list-group-item">ZABALA, Antoni. A prática educativa: como ensinar. Porto Alegre: Editora Artmed, 2002.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingAutores">
+                            <button class="accordion-button collapsed prioridade-alta" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAutores" aria-expanded="false" aria-controls="collapseAutores">
+                                Principais Autores e Teóricos da Educação
+                            </button>
+                        </h2>
+                        <div id="collapseAutores" class="accordion-collapse collapse" aria-labelledby="headingAutores" data-bs-parent="#accordionBibliografia">
+                            <div class="accordion-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">FREIRE, Paulo. Pedagogia da autonomia. São Paulo: Paz e Terra, 2011.</li>
+                                    <li class="list-group-item">PIAGET, Jean. A equilibração das estruturas cognitivas. Rio de Janeiro: Zahar Editores, 1976.</li>
+                                    <li class="list-group-item">VYGOTSKY, Lev Semenovich. A formação social da mente. São Paulo: Martins Fontes, 1991.</li>
+                                    <li class="list-group-item">LUCKESI, Cipriano C. Filosofia da Educação. São Paulo: Ed. Cortez, 2005.</li>
+                                    <li class="list-group-item">RIOS, Terezinha Azerêdo. Ética e competência. São Paulo. Ed Cortez, 2011.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingLegislacao">
+                            <button class="accordion-button collapsed prioridade-alta" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLegislacao" aria-expanded="false" aria-controls="collapseLegislacao">
+                                Legislação da Educação
+                            </button>
+                        </h2>
+                        <div id="collapseLegislacao" class="accordion-collapse collapse" aria-labelledby="headingLegislacao" data-bs-parent="#accordionBibliografia">
+                            <div class="accordion-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">BRASIL. Constituição da República Federativa do Brasil – Artigos 205 a 214.</li>
+                                    <li class="list-group-item">BRASIL. Lei Federal nº 8.069/1990 – Estatuto da Criança e do Adolescente – ECA.</li>
+                                    <li class="list-group-item">BRASIL. Lei Federal nº 9.394/1996 e alterações – Lei de Diretrizes e Bases da Educação Nacional.</li>
+                                    <li class="list-group-item">BRASIL. Novo FUNDEB – Lei Federal nº 14.276/21.</li>
+                                    <li class="list-group-item">BRASIL. Lei nº 11.645/08 – Cultura, história Afro-Brasileira.</li>
+                                    <li class="list-group-item">BNCC – Base Nacional Comum Curricular.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingGestao">
+                            <button class="accordion-button collapsed prioridade-media" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGestao" aria-expanded="false" aria-controls="collapseGestao">
+                                Gestão de Pessoas
+                            </button>
+                        </h2>
+                        <div id="collapseGestao" class="accordion-collapse collapse" aria-labelledby="headingGestao" data-bs-parent="#accordionBibliografia">
+                            <div class="accordion-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">BURBRIDGE, Anna e Marc. Gestão de conflitos: desafio do mundo corporativo. São Paulo: Saraiva, 2012.</li>
+                                    <li class="list-group-item">LÜCK, Heloísa. Liderança em gestão escolar. Petrópolis: Vozes, 2010.</li>
+                                    <li class="list-group-item">THURLER, Mônica Gather e MAULINI, Olivier. A organização do trabalho escolar: uma oportunidade para repensar a escola. Porto Alegre: Penso, 2012.</li>
+                                    <li class="list-group-item">VERGARA, Sylvia Constant. Gestão de Pessoas. São Paulo: Atlas: 2009.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingPortMat">
+                            <button class="accordion-button collapsed prioridade-media" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePortMat" aria-expanded="false" aria-controls="collapsePortMat">
+                                Português e Matemática
+                            </button>
+                        </h2>
+                        <div id="collapsePortMat" class="accordion-collapse collapse" aria-labelledby="headingPortMat" data-bs-parent="#accordionBibliografia">
+                            <div class="accordion-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Gramáticas e livros didáticos atualizados de Língua Portuguesa e Matemática do Ensino Médio.</li>
+                                    <li class="list-group-item">Coleções de questões de concursos anteriores da VUNESP.</li>
+                                    <li class="list-group-item">Plataformas online de questões de concursos.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingInfoAtual">
+                            <button class="accordion-button collapsed prioridade-baixa" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfoAtual" aria-expanded="false" aria-controls="collapseInfoAtual">
+                                Informática e Atualidades
+                            </button>
+                        </h2>
+                        <div id="collapseInfoAtual" class="accordion-collapse collapse" aria-labelledby="headingInfoAtual" data-bs-parent="#accordionBibliografia">
+                            <div class="accordion-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Manuais e tutoriais do Pacote Office (Word, Excel, PowerPoint).</li>
+                                    <li class="list-group-item">Revistas e sites especializados em educação: Nova Escola, Gestão Escolar, PORVIR, etc.</li>
+                                    <li class="list-group-item">Portais de notícias sobre educação: MEC, INEP, Todos pela Educação, etc.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer mt-5">
+        <div class="container text-center">
+            <p>Planner de Estudos para Concurso de Diretor de Escola</p>
+            <p>Baseado nas provas anteriores da VUNESP e no conteúdo programático do edital</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
